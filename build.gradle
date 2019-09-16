@@ -72,7 +72,7 @@ task integrationTest(type: Test) {
 check.dependsOn integrationTest
 
 checkstyle {
-	toolVersion '7.8.1'
+	toolVersion '8.24'
 	configFile file("config/checkstyle/checkstyle.xml")
 }
 checkstyleMain {
