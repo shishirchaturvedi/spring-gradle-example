@@ -28,6 +28,16 @@ repositories {
 }
 
 
+test {
+    filter {
+        //include specific method in any of the tests
+        includeTestsMatching "*Test"
+
+        //include all integration tests
+        includeTestsMatching "*IntegTest"
+    }
+}
+
 jacoco {
     toolVersion = "0.8.4"
     reportsDir = file("$buildDir/jacoco")
@@ -102,4 +112,6 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
     testImplementation 'io.cucumber:cucumber-junit:4.7.2'
     testImplementation 'io.cucumber:cucumber-java8:4.7.2'
+    testCompileOnly 'junit:junit:4.12'
+    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine:5.1.0'
 }
