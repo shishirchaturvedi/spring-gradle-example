@@ -6,6 +6,7 @@ plugins {
 	id 'checkstyle'
 	id 'findbugs'
 	id 'pmd'
+    id "org.sonarqube" version "2.7.1"
 }
 
 group = 'com.pandora.mobiletools.hygieia.pipeline'
@@ -29,14 +30,25 @@ repositories {
 
 jacoco {
 	toolVersion = "0.8.4"
-	reportsDir = file("$buildDir/customJacocoReportDir")
+	reportsDir = file("$buildDir/jacoco")
 }
 
+// Without it, the only data is the binary data,
+// but I need the XML and HTML report after any test task
+tasks.withType(Test) {
+	finalizedBy jacocoTestReport
+}
+
+// Configure the report to look for executionData generated during the test and integrationTest task
 jacocoTestReport {
+	executionData(file("${project.buildDir}/jacoco/jacocoTest.exec"))
 	reports {
-		xml.enabled false
-		csv.enabled false
-		html.destination file("${buildDir}/jacocoHtml")
+		// for sonarqube
+		xml.enabled true
+		xml.destination(file("${project.buildDir}/reports/jacoco/all-tests/jacocoAllTestReport.xml"))
+		// for devs
+		html.enabled true
+		html.destination file("${project.buildDir}/reports/jacoco/all-tests/html")
 	}
 }
 
@@ -48,28 +60,23 @@ test {
 	}
 }
 
-sourceSets {
-	intTest {
-		compileClasspath += sourceSets.main.output
-		runtimeClasspath += sourceSets.main.output
+configurations {
+	cucumberRuntime {
+		extendsFrom testImplementation
+	}
+}
+task cucumber() {
+	dependsOn assemble, compileTestJava
+	doLast {
+		javaexec {
+			main = "cucumber.api.cli.Main"
+			classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+			args = ['--plugin', 'html:build/cucumber-html-report','--plugin', 'pretty','--glue', 'com.pandora.mobiletools.hygieia.pipeline.testapp', 'src/test/resources']
+		}
 	}
 }
 
-configurations {
-	intTestImplementation.extendsFrom implementation
-	intTestRuntimeOnly.extendsFrom runtimeOnly
-}
-
-task integrationTest(type: Test) {
-	description = 'Runs integration tests.'
-	group = 'verification'
-
-	testClassesDirs = sourceSets.intTest.output.classesDirs
-	classpath = sourceSets.intTest.runtimeClasspath
-	shouldRunAfter test
-}
-
-check.dependsOn integrationTest
+check.dependsOn test
 
 checkstyle {
 	toolVersion '8.24'
@@ -93,8 +100,6 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
 	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
-	intTestImplementation 'org.springframework.boot:spring-boot-starter-test'
-	intTestImplementation 'org.springframework.security:spring-security-test'
-	intTestImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
-	intTestRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+	testImplementation 'io.cucumber:cucumber-junit:4.7.2'
+	testImplementation 'io.cucumber:cucumber-java8:4.7.2'
 }
