@@ -3,12 +3,10 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
     id 'java'
     id 'jacoco'
-/*
     id 'checkstyle'
     id 'findbugs'
     id 'pmd'
     id "org.sonarqube" version "2.7.1"
-*/
 }
 
 group = 'com.pandora.mobiletools.hygieia.pipeline'
@@ -80,7 +78,6 @@ configurations {
 }
 
 check.dependsOn test
-/*
 checkstyle {
     toolVersion '8.24'
     configFile file("config/checkstyle/checkstyle.xml")
@@ -90,7 +87,7 @@ checkstyleMain {
 }
 checkstyleTest {
     source = 'src/test/java'
-}*/
+}
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
