@@ -55,7 +55,7 @@ jacocoTestReport {
     reports {
         // for sonarqube
         xml.enabled true
-        xml.destination(file("${project.buildDir}/reports/jacoco/all-tests/jacocoAllTestReport.xml"))
+        xml.destination(file("${project.buildDir}/reports/jacoco/all-tests/jacoco.xml"))
         // for devs
         html.enabled true
         html.destination file("${project.buildDir}/reports/jacoco/all-tests/html")
@@ -68,21 +68,12 @@ test {
         destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
         classDumpDir = file("$buildDir/jacoco/classpathdumps")
     }
+    reports.html.enabled = true
 }
 
 configurations {
     cucumberRuntime {
         extendsFrom testImplementation
-    }
-}
-task cucumber() {
-    dependsOn assemble, compileTestJava
-    doLast {
-        javaexec {
-            main = "cucumber.api.cli.Main"
-            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-            args = ['--plugin', 'html:build/cucumber/report/html', '--plugin', 'json:build/cucumber/report/json/cucumber.json', '--plugin', 'pretty', '--glue', 'com.pandora.mobiletools.hygieia.pipeline.testapp', 'src/test/resources']
-        }
     }
 }
 
